@@ -22,7 +22,7 @@ func TestApi_CreateUser(t *testing.T) {
 		"userId":   342,
 		"userType": "client",
 	}
-	user := auth0.CreateUser{
+	user := auth0.CreateUserRequestData{
 		Connection:   "Username-Password-Authentication",
 		Email:        "test_email@gmail.com",
 		Password:     "test_password",
@@ -48,7 +48,7 @@ func TestApi_CreateUserEmailAlreadyExists(t *testing.T) {
 		"userId":   342,
 		"userType": "client",
 	}
-	user := auth0.CreateUser{
+	user := auth0.CreateUserRequestData{
 		Email:        "mail_exists@test.com",
 		Password:     "test_password",
 		AppMetadata:  appMetadata,
@@ -76,7 +76,7 @@ func TestApi_CreateUserEmailAlreadyExists(t *testing.T) {
 	}
 }
 
-func mockUserHandler(createUser auth0.CreateUser) http.HandlerFunc {
+func mockUserHandler(createUser auth0.CreateUserRequestData) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
@@ -107,7 +107,7 @@ func mockUserHandler(createUser auth0.CreateUser) http.HandlerFunc {
 	}
 }
 
-func getUserSampleResponse(createUser auth0.CreateUser) auth0.GetUser {
+func getUserSampleResponse(createUser auth0.CreateUserRequestData) auth0.GetUser {
 	return auth0.GetUser{
 		Email:         createUser.Email,
 		EmailVerified: createUser.EmailVerified,

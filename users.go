@@ -6,7 +6,11 @@ import (
 	"net/http"
 )
 
-type CreateUser struct {
+type UserCreator interface {
+	CreateUser(requestData CreateUserRequestData) *ErrorResponse
+}
+
+type CreateUserRequestData struct {
 	Connection    string                 `json:"connection"`
 	Email         string                 `json:"email"`
 	Password      string                 `json:"password"`
@@ -46,7 +50,7 @@ type Identity struct {
 	IsSocial   bool   `json:"isSocial"`
 }
 
-func (api *Api) CreateUser(user CreateUser) *ErrorResponse {
+func (api *Api) CreateUser(user CreateUserRequestData) *ErrorResponse {
 	if len(user.Connection) == 0 {
 		user.Connection = api.DefaultConnection
 	}
