@@ -8,8 +8,9 @@ import (
 )
 
 type Api struct {
-	Url   string
-	Token string
+	Url               string
+	Token             string
+	DefaultConnection string
 }
 
 func (api *Api) Post(endpointUrl string, body interface{}) (*http.Response, error) {

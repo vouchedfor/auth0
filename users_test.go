@@ -24,7 +24,7 @@ func TestApi_CreateUser(t *testing.T) {
 	}
 	user := auth0.CreateUser{
 		Connection:   "Username-Password-Authentication",
-		Email:        "mspiewak8dd88d88@gmail.com",
+		Email:        "test_email@gmail.com",
 		Password:     "test_password",
 		AppMetadata:  appMetadata,
 		UserMetadata: make(map[string]interface{}),
@@ -49,7 +49,6 @@ func TestApi_CreateUserEmailAlreadyExists(t *testing.T) {
 		"userType": "client",
 	}
 	user := auth0.CreateUser{
-		Connection:   "Username-Password-Authentication",
 		Email:        "mail_exists@test.com",
 		Password:     "test_password",
 		AppMetadata:  appMetadata,
@@ -60,8 +59,9 @@ func TestApi_CreateUserEmailAlreadyExists(t *testing.T) {
 	defer apiServer.Close()
 
 	api := auth0.Api{
-		Url:   apiServer.URL,
-		Token: "valid_token",
+		Url:               apiServer.URL,
+		Token:             "valid_token",
+		DefaultConnection: "Username-Password-Authentication",
 	}
 
 	expectedError := api.CreateUser(user)

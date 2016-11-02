@@ -47,6 +47,9 @@ type Identity struct {
 }
 
 func (api *Api) CreateUser(user CreateUser) *ErrorResponse {
+	if len(user.Connection) == 0 {
+		user.Connection = api.DefaultConnection
+	}
 	result, err := api.Post("/api/v2/users", user)
 	if err != nil {
 		return &ErrorResponse{Message: err.Error()}
