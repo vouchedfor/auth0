@@ -29,6 +29,17 @@ func TestApi_Post(t *testing.T) {
 	api.Post(endpointUrl, body)
 }
 
+func TestApi_Post__DoNothingWhenUrlNotSet(t *testing.T) {
+	api := auth0.Api{
+		Token: "valid_token",
+	}
+
+	response, err := api.Post("test/endpoint", int(8))
+	if response != nil || err != nil {
+		t.Error("Should stop execution when auth0 api url not set")
+	}
+}
+
 func mockApiHandler(t *testing.T, endpointUrl string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
