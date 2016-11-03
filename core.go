@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -15,10 +14,6 @@ type Api struct {
 }
 
 func (api *Api) Post(endpointUrl string, body interface{}) (*http.Response, error) {
-	if len(api.Url) == 0 {
-		log.Println("Request hasn't been sent. Auth0 url doesn't exist.")
-		return nil, nil
-	}
 	jsonStr, err := json.Marshal(body)
 	if err != nil {
 		panic(err.Error())

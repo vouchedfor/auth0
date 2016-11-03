@@ -7,7 +7,7 @@ import (
 )
 
 type UserCreator interface {
-	CreateUser(requestData CreateUserRequestData) *ErrorResponse
+	CreateUser(createUserRequestData CreateUserRequestData) *ErrorResponse
 }
 
 type CreateUserRequestData struct {
@@ -50,11 +50,11 @@ type Identity struct {
 	IsSocial   bool   `json:"isSocial"`
 }
 
-func (api *Api) CreateUser(user CreateUserRequestData) *ErrorResponse {
-	if len(user.Connection) == 0 {
-		user.Connection = api.DefaultConnection
+func (api *Api) CreateUser(createUserRequestData CreateUserRequestData) *ErrorResponse {
+	if len(createUserRequestData.Connection) == 0 {
+		createUserRequestData.Connection = api.DefaultConnection
 	}
-	result, err := api.Post("/api/v2/users", user)
+	result, err := api.Post("/api/v2/users", createUserRequestData)
 	if err != nil {
 		return &ErrorResponse{Message: err.Error()}
 	}
