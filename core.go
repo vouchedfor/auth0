@@ -13,13 +13,13 @@ type Api struct {
 	DefaultConnection string
 }
 
-func (api *Api) Post(endpointUrl string, body interface{}) (*http.Response, error) {
+func (api *Api) Send(method, endpointUrl string, body interface{}) (*http.Response, error) {
 	jsonStr, err := json.Marshal(body)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	req, err := http.NewRequest(http.MethodPost, api.Url+endpointUrl, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest(method, api.Url+endpointUrl, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return nil, err
 	}

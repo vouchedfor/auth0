@@ -23,14 +23,14 @@ func TestApi_CreateUser(t *testing.T) {
 		"userType": "client",
 	}
 	user := auth0.CreateUserRequestData{
-		Connection:   "Username-Password-Authentication",
+		Connection:   "test",
 		Email:        "test_email@gmail.com",
 		Password:     "test_password",
 		AppMetadata:  appMetadata,
 		UserMetadata: make(map[string]interface{}),
 	}
 
-	apiServer := httptest.NewServer(http.HandlerFunc(mockUserHandler(user)))
+	apiServer := httptest.NewServer(http.HandlerFunc(mockUserHandler(user, auth0.UpdateUserRequestData{})))
 	defer apiServer.Close()
 
 	api := auth0.Api{
@@ -55,7 +55,7 @@ func TestApi_CreateUserEmailAlreadyExists(t *testing.T) {
 		UserMetadata: make(map[string]interface{}),
 	}
 
-	apiServer := httptest.NewServer(http.HandlerFunc(mockUserHandler(user)))
+	apiServer := httptest.NewServer(http.HandlerFunc(mockUserHandler(user, auth0.UpdateUserRequestData{})))
 	defer apiServer.Close()
 
 	api := auth0.Api{
@@ -76,7 +76,28 @@ func TestApi_CreateUserEmailAlreadyExists(t *testing.T) {
 	}
 }
 
-func mockUserHandler(createUser auth0.CreateUserRequestData) http.HandlerFunc {
+func TestApi_UpdateUser(t *testing.T) {
+	user := auth0.UpdateUserRequestData{
+		Connection: "test",
+		ID:         "test_id",
+		Email:      "updated_email@gmail.com",
+		Password:   "updated_password",
+	}
+
+	apiServer := httptest.NewServer(http.HandlerFunc(mockUserHandler(auth0.CreateUserRequestData{}, user)))
+	defer apiServer.Close()
+
+	api := auth0.Api{
+		Url:   apiServer.URL,
+		Token: "valid_token",
+	}
+
+	if err := api.UpdateUser(user); err != nil {
+		t.Errorf("unexpected error: %s", err.Error())
+	}
+}
+
+func mockUserHandler(createUser auth0.CreateUserRequestData, updateUser auth0.UpdateUserRequestData) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
@@ -97,17 +118,30 @@ func mockUserHandler(createUser auth0.CreateUserRequestData) http.HandlerFunc {
 				}
 
 				w.WriteHeader(http.StatusCreated)
-				if err := json.NewEncoder(w).Encode(getUserSampleResponse(createUser)); err != nil {
+				if err := json.NewEncoder(w).Encode(getCreateUserSampleResponse(createUser)); err != nil {
 					log.Println("Mock API: Failed to encode output body")
 				}
 			} else {
 				w.WriteHeader(http.StatusNotFound)
 			}
+		case http.MethodPatch:
+			if r.URL.Path == "/api/v2/users/test_id" {
+				w.WriteHeader(http.StatusOK)
+				if err := json.NewEncoder(w).Encode(getUpdateUserSampleResponse(updateUser)); err != nil {
+
+					log.Println("Mock API: Failed to encode output body")
+				}
+			} else {
+				w.WriteHeader(http.StatusNotFound)
+			}
+
+		default:
+			w.WriteHeader(http.StatusNotFound)
 		}
 	}
 }
 
-func getUserSampleResponse(createUser auth0.CreateUserRequestData) auth0.GetUser {
+func getCreateUserSampleResponse(createUser auth0.CreateUserRequestData) auth0.GetUser {
 	return auth0.GetUser{
 		Email:         createUser.Email,
 		EmailVerified: createUser.EmailVerified,
@@ -126,6 +160,39 @@ func getUserSampleResponse(createUser auth0.CreateUserRequestData) auth0.GetUser
 			},
 		},
 		AppMetadata:  createUser.AppMetadata,
+		UserMetadata: make(map[string]interface{}),
+		Picture:      "",
+		Name:         "",
+		Nickname:     "",
+		Multifactor:  nil,
+		LastIP:       "",
+		LastLogin:    "",
+		LoginsCount:  0,
+		Blocked:      false,
+		GivenName:    "",
+		FamilyName:   "",
+	}
+}
+
+func getUpdateUserSampleResponse(updateUser auth0.UpdateUserRequestData) auth0.GetUser {
+	return auth0.GetUser{
+		Email:         updateUser.Email,
+		EmailVerified: false,
+		Username:      "",
+		PhoneNumber:   "",
+		PhoneVerified: false,
+		UserID:        "usr_5457edea1b8f33391a000004",
+		CreatedAt:     "",
+		UpdatedAt:     "",
+		Identities: []auth0.Identity{
+			{
+				Connection: updateUser.Connection,
+				UserID:     "5457edea1b8f22891a000004",
+				Provider:   "auth0",
+				IsSocial:   false,
+			},
+		},
+		AppMetadata:  make(map[string]interface{}),
 		UserMetadata: make(map[string]interface{}),
 		Picture:      "",
 		Name:         "",

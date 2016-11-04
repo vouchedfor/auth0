@@ -2,6 +2,7 @@ package auth0
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -17,6 +18,13 @@ type CreateUserRequestData struct {
 	EmailVerified bool                   `json:"email_verified"`
 	UserMetadata  map[string]interface{} `json:"user_metadata"`
 	AppMetadata   map[string]interface{} `json:"app_metadata"`
+}
+
+type UpdateUserRequestData struct {
+	ID         string `json:"-"`
+	Connection string `json:"connection"`
+	Email      string `json:"email,omitempty"`
+	Password   string `json:"password,omitempty"`
 }
 
 type GetUser struct {
@@ -54,7 +62,7 @@ func (api *Api) CreateUser(createUserRequestData CreateUserRequestData) *ErrorRe
 	if len(createUserRequestData.Connection) == 0 {
 		createUserRequestData.Connection = api.DefaultConnection
 	}
-	result, err := api.Post("/api/v2/users", createUserRequestData)
+	result, err := api.Send(http.MethodPost, "/api/v2/users", createUserRequestData)
 	if err != nil {
 		return &ErrorResponse{Message: err.Error()}
 	}
@@ -69,6 +77,35 @@ func (api *Api) CreateUser(createUserRequestData CreateUserRequestData) *ErrorRe
 		errorResponse := ErrorResponse{}
 		err = json.Unmarshal(responseData, &errorResponse)
 		if err != nil {
+			panic(err.Error())
+		}
+
+		return &errorResponse
+	}
+
+	return nil
+}
+
+func (api *Api) UpdateUser(updateUserRequestData UpdateUserRequestData) *ErrorResponse {
+	if len(updateUserRequestData.Connection) == 0 {
+		updateUserRequestData.Connection = api.DefaultConnection
+	}
+	result, err := api.Send(http.MethodPatch, "/api/v2/users/"+updateUserRequestData.ID, updateUserRequestData)
+	if err != nil {
+		return &ErrorResponse{Message: err.Error()}
+	}
+
+	defer result.Body.Close()
+	responseData, err := ioutil.ReadAll(result.Body)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if result.StatusCode != http.StatusOK {
+		errorResponse := ErrorResponse{}
+		err = json.Unmarshal(responseData, &errorResponse)
+		if err != nil {
+			fmt.Println("safa")
 			panic(err.Error())
 		}
 
