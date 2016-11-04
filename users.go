@@ -2,13 +2,16 @@ package auth0
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
 type UserCreator interface {
 	CreateUser(createUserRequestData CreateUserRequestData) *ErrorResponse
+}
+
+type UserUpdater interface {
+	UpdateUser(updateUserRequestData UpdateUserRequestData) *ErrorResponse
 }
 
 type CreateUserRequestData struct {
@@ -105,7 +108,6 @@ func (api *Api) UpdateUser(updateUserRequestData UpdateUserRequestData) *ErrorRe
 		errorResponse := ErrorResponse{}
 		err = json.Unmarshal(responseData, &errorResponse)
 		if err != nil {
-			fmt.Println("safa")
 			panic(err.Error())
 		}
 
