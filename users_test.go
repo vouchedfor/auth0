@@ -78,10 +78,11 @@ func TestApi_CreateUserEmailAlreadyExists(t *testing.T) {
 
 func TestApi_UpdateUser(t *testing.T) {
 	user := auth0.UpdateUserRequestData{
-		Connection: "test",
-		ID:         "test_id",
-		Email:      "updated_email@gmail.com",
-		Password:   "updated_password",
+		Connection:    "test",
+		ID:            "test_id",
+		Email:         "updated_email@gmail.com",
+		EmailVerified: true,
+		Password:      "updated_password",
 	}
 
 	apiServer := httptest.NewServer(http.HandlerFunc(mockUserHandler(auth0.CreateUserRequestData{}, user)))

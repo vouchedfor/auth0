@@ -24,10 +24,11 @@ type CreateUserRequestData struct {
 }
 
 type UpdateUserRequestData struct {
-	ID         string `json:"-"`
-	Connection string `json:"connection"`
-	Email      string `json:"email,omitempty"`
-	Password   string `json:"password,omitempty"`
+	ID            string `json:"-"`
+	Connection    string `json:"connection"`
+	Email         string `json:"email,omitempty"`
+	EmailVerified bool   `json:"email_verified,omitempty"`
+	Password      string `json:"password,omitempty"`
 }
 
 type GetUser struct {
