@@ -98,11 +98,30 @@ func TestApi_UpdateUser(t *testing.T) {
 	}
 }
 
+func TestApi_SendVerificationEmail(t *testing.T) {
+	requestData := auth0.SendVerificationEmailRequestData{
+		UserId: "auth0|testststststs",
+	}
+
+	apiServer := httptest.NewServer(http.HandlerFunc(mockUserHandler(auth0.CreateUserRequestData{}, auth0.UpdateUserRequestData{})))
+	defer apiServer.Close()
+
+	api := auth0.Api{
+		Url:   apiServer.URL,
+		Token: "valid_token",
+	}
+
+	if err := api.SendVerificationEmail(requestData); err != nil {
+		t.Errorf("unexpected error: %s", err.Error())
+	}
+}
+
 func mockUserHandler(createUser auth0.CreateUserRequestData, updateUser auth0.UpdateUserRequestData) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			if r.URL.Path == "/api/v2/users" {
+			switch r.URL.Path {
+			case "/api/v2/users":
 				if createUser.Email == "mail_exists@test.com" {
 					w.WriteHeader(http.StatusBadRequest)
 					apiResponse := apiErrorResponse{
@@ -122,14 +141,17 @@ func mockUserHandler(createUser auth0.CreateUserRequestData, updateUser auth0.Up
 				if err := json.NewEncoder(w).Encode(getCreateUserSampleResponse(createUser)); err != nil {
 					log.Println("Mock API: Failed to encode output body")
 				}
-			} else {
+				break
+			case "/api/v2/jobs/post_verification_email":
+				w.WriteHeader(http.StatusCreated)
+				break
+			default:
 				w.WriteHeader(http.StatusNotFound)
 			}
 		case http.MethodPatch:
 			if r.URL.Path == "/api/v2/users/test_id" {
 				w.WriteHeader(http.StatusOK)
 				if err := json.NewEncoder(w).Encode(getUpdateUserSampleResponse(updateUser)); err != nil {
-
 					log.Println("Mock API: Failed to encode output body")
 				}
 			} else {

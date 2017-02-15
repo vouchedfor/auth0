@@ -31,6 +31,10 @@ type UpdateUserRequestData struct {
 	Password      string `json:"password,omitempty"`
 }
 
+type SendVerificationEmailRequestData struct {
+	UserId string `json:"user_id"`
+}
+
 type GetUser struct {
 	Email         string                 `json:"email"`
 	EmailVerified bool                   `json:"email_verified"`
@@ -106,6 +110,31 @@ func (api *Api) UpdateUser(updateUserRequestData UpdateUserRequestData) *ErrorRe
 	}
 
 	if result.StatusCode != http.StatusOK {
+		errorResponse := ErrorResponse{}
+		err = json.Unmarshal(responseData, &errorResponse)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		return &errorResponse
+	}
+
+	return nil
+}
+
+func (api *Api) SendVerificationEmail(requestData SendVerificationEmailRequestData) *ErrorResponse {
+	result, err := api.Send(http.MethodPost, "/api/v2/jobs/post_verification_email", requestData)
+	if err != nil {
+		return &ErrorResponse{Message: err.Error()}
+	}
+
+	defer result.Body.Close()
+	responseData, err := ioutil.ReadAll(result.Body)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if result.StatusCode != http.StatusCreated {
 		errorResponse := ErrorResponse{}
 		err = json.Unmarshal(responseData, &errorResponse)
 		if err != nil {
