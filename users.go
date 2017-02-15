@@ -14,6 +14,10 @@ type UserUpdater interface {
 	UpdateUser(updateUserRequestData UpdateUserRequestData) *ErrorResponse
 }
 
+type SendVerificationMailer interface {
+	SendVerificationEmail(sendVerificationRequestData SendVerificationEmailRequestData) *ErrorResponse
+}
+
 type CreateUserRequestData struct {
 	Connection    string                 `json:"connection"`
 	Email         string                 `json:"email"`
